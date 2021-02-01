@@ -1,0 +1,54 @@
+% Number of patients - The number of patients of corresponding dataset 
+% dataset - the dataset that will be used, either normal or AF dataset
+% data type - two options - 1 or 0; 
+% 1 - Normal and 0 - AF
+% Depending on different data type, different offset values from peak index
+% will be used
+function [QRS_interval] = QRS_Interval_Extraction(Number_of_patients,dataset,data_type)
+QRS_interval = zeros(Number_of_patients,1);
+
+if data_type == 1
+    offset_QRS = 60; 
+    % Since the ARS interval should be <= 120ms for normal people Check if
+    % the peak is valid, as in, if there could potentially be
+    MinH = 0.1;
+else
+    offset_QRS = 90;
+    % For patients with AF, the offset should be bigger as the QRS interval
+    % might be larger 
+    MinH = 0.05;
+end 
+
+for m = 1 : Number_of_patients
+    [~,qrs_i] = findpeaks(dataset(m,:),'MinPeakHeight',MinH,'MinPeakDistance',200);
+    No_Peaks = size(qrs_i,2);
+    QRS_interval_temp = 0;
+    No_valid_peak = 0; % Number of Valid Peak, since some peaks are near 
+    % the beginning and the end of dataset, which we will ignore
+    P_wave_AMP_temp 
+    for i = 1 : No_Peaks
+        temp_peak = qrs_i(i);
+        
+        if qrs_i_AF(i) > offset_P
+            dataset_temp_P = dataset(m,temp_peak-offset_P:temp_peak);
+            [~,P_wave] = findpeaks(dataset_temp_P); 
+            P_wave_amp = AF_LPfiltered(m,P_wave); % Calcuate the amplititude
+            P_wave_amp_ave = mean(P_wave_amp); % Find out the average amplititude 
+            P_wave_AMP_temp = [P_wave_AMP_temp;P_wave_amp_ave];
+            % For all the R points, get the coresponding P waves
+            temp_peak_matrix_pp = [temp_peak_matrix_pp; temp_peak];
+        else 
+            continue 
+       end
+        temp_peak_ave_pp = mean(temp_peak_matrix_pp);
+        P_wave_amp_AF_pp = mean(P_wave_AMP_temp); % For each person, check the mean p_wave value
+
+    end
+    R_AF_amp_matrix(m) = temp_peak_ave_pp;
+    Relative_amp_AF = 10^5*abs(P_wave_AF_matrix./R_AF_amp_matrix);
+    P_wave_AF_matrix(m) = P_wave_amp_AF_pp;
+    Relative_amp_AF(isnan(Relative_amp_AF)) = 0;
+    % =================================================================== %
+end
+
+end
